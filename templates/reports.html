@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Reports{% endblock %}
+{% block page_title %}Security Reports{% endblock %}
+{% block page_sub %}Generate a point-in-time summary across every module{% endblock %}
+
+{% block content %}
+
+<div class="card">
+  <div class="card-header"><h2>Report Preview</h2></div>
+  <div class="strip" style="margin-top:0;">
+    <div class="card">
+      <div class="strip-title">Alerts</div>
+      <div class="strip-row"><span>High</span><span style="color:var(--danger)">{{ alert_summary.HIGH }}</span></div>
+      <div class="strip-row"><span>Medium</span><span style="color:var(--warn)">{{ alert_summary.MEDIUM }}</span></div>
+      <div class="strip-row"><span>Low</span><span style="color:var(--good)">{{ alert_summary.LOW }}</span></div>
+    </div>
+    <div class="card">
+      <div class="strip-title">Firewall</div>
+      <div class="strip-row"><span>Allowed</span><span>{{ fw_counts.allowed }}</span></div>
+      <div class="strip-row"><span>Blocked</span><span>{{ fw_counts.blocked }}</span></div>
+      <div class="strip-row"><span>Suspicious</span><span>{{ fw_counts.suspicious }}</span></div>
+    </div>
+    <div class="card">
+      <div class="strip-title">SIEM</div>
+      <div class="strip-row"><span>Events collected</span><span>{{ siem_counts.events_collected }}</span></div>
+      <div class="strip-row"><span>Alerts generated</span><span>{{ siem_counts.alerts_generated }}</span></div>
+      <div class="strip-row"><span>DNS flagged</span><span>{{ dns_counts.review + dns_counts.blocked }}</span></div>
+    </div>
+  </div>
+
+  <form method="POST" action="{{ url_for('reports_generate') }}" class="btn-row mt-16" style="margin-bottom:0;">
+    <button class="btn" type="submit">📑 Generate & Download Report</button>
+    <span class="text-muted" style="font-size:12.5px;">Exports a plain-text summary (.txt) — swap in a PDF/xlsx renderer for a polished client deliverable.</span>
+  </form>
+</div>
+
+{% endblock %}

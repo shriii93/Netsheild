@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Settings{% endblock %}
+{% block page_title %}Settings{% endblock %}
+{% block page_sub %}Detection thresholds and platform configuration{% endblock %}
+
+{% block content %}
+
+<div class="card">
+  <div class="card-header"><h2>Detection Thresholds</h2></div>
+  <div class="strip" style="margin-top:0;">
+    <div class="card">
+      <div class="strip-title">Brute-Force</div>
+      <div class="strip-row"><span>Alert threshold</span><span>10 attempts / 5 min</span></div>
+      <div class="strip-row"><span>Warning threshold</span><span>3 attempts</span></div>
+    </div>
+    <div class="card">
+      <div class="strip-title">Latency</div>
+      <div class="strip-row"><span>Warning</span><span>80 ms</span></div>
+      <div class="strip-row"><span>Critical</span><span>200 ms</span></div>
+    </div>
+    <div class="card">
+      <div class="strip-title">Firewall</div>
+      <div class="strip-row"><span>Block spike threshold</span><span>50 events</span></div>
+    </div>
+  </div>
+  <p class="text-muted mt-16" style="margin-bottom:0;">
+    Thresholds are defined in <span class="mono">detection/rules.py</span>. Wire this screen up to a
+    settings table if you want them editable at runtime.
+  </p>
+</div>
+
+{% endblock %}

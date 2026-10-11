@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Monitoring{% endblock %}
+{% block page_title %}Network Monitoring{% endblock %}
+{% block page_sub %}Host connectivity, latency, and packet loss{% endblock %}
+
+{% block content %}
+
+<div class="btn-row">
+  <button class="btn" onclick="location.reload()">▶ Refresh Monitoring</button>
+  <span class="badge badge-info">Average latency: {{ avg_latency }} ms</span>
+</div>
+
+<div class="card">
+  <div class="card-header"><h2>Monitored Hosts</h2></div>
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr><th>Host</th><th>Name</th><th>Status</th><th>Latency</th><th>Packet Loss</th></tr>
+      </thead>
+      <tbody>
+        {% for h in hosts %}
+        <tr>
+          <td class="mono">{{ h.host }}</td>
+          <td>{{ h.hostname }}</td>
+          <td>
+            {% if h.status == 'online' %}
+              <span class="badge badge-good"><span class="dot dot-good"></span> ONLINE</span>
+            {% else %}
+              <span class="badge badge-bad"><span class="dot dot-bad"></span> OFFLINE</span>
+            {% endif %}
+          </td>
+          <td class="mono">{{ h.latency_ms if h.latency_ms is not none else "—" }} {{ "ms" if h.latency_ms is not none }}</td>
+          <td class="mono">{{ h.packet_loss }}%</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="card mt-16">
+  <div class="card-header"><h2>Latency History</h2></div>
+  <div class="chart-box"><canvas id="monChart"></canvas></div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+fetch("/api/monitoring/history")
+  .then(r => r.json())
+  .then(series => {
+    const colors = ["#2DD4BF", "#5B8DEF", "#D29922", "#B855F0", "#3FB950"];
+    const hosts = Object.keys(series);
+    const labels = hosts.length ? series[hosts[0]].labels : [];
+    const datasets = hosts.map((h, i) => ({ label: h, data: series[h].data, color: colors[i % colors.length] }));
+    buildLineChart(document.getElementById("monChart"), labels, datasets);
+  });
+</script>
+{% endblock %}

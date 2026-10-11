@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}PCAP Analysis{% endblock %}
+{% block page_title %}PCAP Threat Analyzer{% endblock %}
+{% block page_sub %}Upload a packet capture to run protocol and anomaly analysis{% endblock %}
+
+{% block content %}
+
+<div class="card">
+  <div class="card-header"><h2>Upload Capture</h2></div>
+  <form method="POST" action="{{ url_for('pcap_upload') }}" enctype="multipart/form-data" class="btn-row" style="margin-bottom:0;">
+    <input type="file" name="pcap_file" accept=".pcap,.pcapng">
+    <button class="btn" type="submit">📁 Analyze File</button>
+  </form>
+</div>
+
+{% if analysis %}
+<div class="grid grid-4 mt-16">
+  <div class="card stat-card stat-info">
+    <div class="stat-label">Packets Analyzed</div>
+    <div class="stat-value">{{ "{:,}".format(analysis.packets_total) }}</div>
+    <div class="stat-foot">{{ analysis.file_name }}</div>
+  </div>
+  <div class="card stat-card stat-good">
+    <div class="stat-label">TCP</div>
+    <div class="stat-value">{{ "{:,}".format(analysis.tcp_count) }}</div>
+  </div>
+  <div class="card stat-card stat-good">
+    <div class="stat-label">UDP</div>
+    <div class="stat-value">{{ "{:,}".format(analysis.udp_count) }}</div>
+  </div>
+  <div class="card stat-card stat-info">
+    <div class="stat-label">DNS</div>
+    <div class="stat-value">{{ "{:,}".format(analysis.dns_count) }}</div>
+  </div>
+</div>
+
+<div class="card mt-16">
+  <div class="card-header"><h2>Threat Analysis</h2></div>
+  <div class="feed">
+    {% for f in analysis.findings %}
+    <div class="feed-item {{ 'sev-LOW' if 'Normal' in f else 'sev-MEDIUM' }}">
+      <span class="dot {{ 'dot-good' if 'Normal' in f else 'dot-warn' }}"></span>
+      <div class="feed-title">{{ f }}</div>
+    </div>
+    {% endfor %}
+  </div>
+  <div class="btn-row mt-16" style="margin-bottom:0;">
+    <a class="btn btn-ghost" href="{{ url_for('reports_page') }}">📑 Generate Report</a>
+  </div>
+</div>
+{% else %}
+<div class="empty-state mt-16"><div class="empty-ic">📡</div>No capture analyzed yet. Upload a .pcap file above.</div>
+{% endif %}
+
+{% endblock %}

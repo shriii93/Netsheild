@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}DNS Security{% endblock %}
+{% block page_title %}DNS Security Monitor{% endblock %}
+{% block page_sub %}Query monitoring for suspicious or anomalous domains{% endblock %}
+
+{% block content %}
+
+<div class="grid grid-3">
+  <div class="card stat-card stat-good">
+    <div class="stat-label">Normal Queries</div>
+    <div class="stat-value">{{ "{:,}".format(counts.normal) }}</div>
+  </div>
+  <div class="card stat-card stat-warn">
+    <div class="stat-label">Flagged for Review</div>
+    <div class="stat-value">{{ "{:,}".format(counts.review) }}</div>
+  </div>
+  <div class="card stat-card stat-bad">
+    <div class="stat-label">Blocked</div>
+    <div class="stat-value">{{ "{:,}".format(counts.blocked) }}</div>
+  </div>
+</div>
+
+<div class="card mt-16">
+  <div class="card-header">
+    <h2>DNS Queries</h2>
+    <a class="badge badge-info" href="#">View DNS History →</a>
+  </div>
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead><tr><th>Domain</th><th>Type</th><th>Time</th><th>Status</th></tr></thead>
+      <tbody>
+        {% for q in queries %}
+        <tr>
+          <td class="mono">{{ q.domain }}</td>
+          <td class="mono">{{ q.query_type }}</td>
+          <td class="mono text-muted">{{ q.queried_at }}</td>
+          <td>
+            {% if q.status == 'NORMAL' %}
+              <span class="badge badge-good">NORMAL</span>
+            {% elif q.status == 'REVIEW' %}
+              <span class="badge badge-warn">REVIEW</span>
+            {% else %}
+              <span class="badge badge-bad">BLOCKED</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}

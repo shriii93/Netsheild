@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}NetShield{% endblock %} :: Network Security Monitoring</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  {% block extra_head %}{% endblock %}
+</head>
+
+<body>
+
+  <div class="app-shell">
+
+    <!-- ================= SIDEBAR ================= -->
+    <aside class="sidebar">
+      <div class="brand">
+        <span class="brand-mark">
+          <svg viewBox="0 0 40 40" class="shield-icon">
+            <path d="M20 2 L36 8 V19 C36 29 29 36 20 39 C11 36 4 29 4 19 V8 Z" class="shield-path" />
+            <path d="M12 20 L18 26 L29 14" class="shield-check" />
+          </svg>
+        </span>
+        <div class="brand-text">
+          <span class="brand-name">NetShield</span>
+          <span class="brand-tag">Discover · Monitor · Detect</span>
+        </div>
+      </div>
+
+      <nav class="nav">
+        <a href="{{ url_for('dashboard') }}" class="nav-item {{ 'active' if active=='dashboard' }}">
+          <span class="nav-ic">🏠</span> Dashboard
+        </a>
+        <a href="{{ url_for('monitoring_page') }}" class="nav-item {{ 'active' if active=='monitoring' }}">
+          <span class="nav-ic">📊</span> Monitoring
+        </a>
+        <a href="{{ url_for('discovery_page') }}" class="nav-item {{ 'active' if active=='discovery' }}">
+          <span class="nav-ic">🔎</span> LAN Scan
+        </a>
+        <a href="{{ url_for('vulnerability_page') }}" class="nav-item {{ 'active' if active=='vulnerability' }}">
+          <span class="nav-ic">🔐</span> Security
+        </a>
+        <a href="{{ url_for('pcap_page') }}" class="nav-item {{ 'active' if active=='pcap' }}">
+          <span class="nav-ic">📡</span> PCAP
+        </a>
+        <a href="{{ url_for('firewall_page') }}" class="nav-item {{ 'active' if active=='firewall' }}">
+          <span class="nav-ic">🧱</span> Firewall
+        </a>
+        <a href="{{ url_for('brute_force_page') }}" class="nav-item {{ 'active' if active=='brute_force' }}">
+          <span class="nav-ic">🔑</span> Brute-Force
+        </a>
+        <a href="{{ url_for('dns_page') }}" class="nav-item {{ 'active' if active=='dns' }}">
+          <span class="nav-ic">🌐</span> DNS
+        </a>
+        <a href="{{ url_for('siem_page') }}" class="nav-item {{ 'active' if active=='siem' }}">
+          <span class="nav-ic">📋</span> SIEM
+        </a>
+        <a href="{{ url_for('alerts_page') }}" class="nav-item {{ 'active' if active=='alerts' }}">
+          <span class="nav-ic">🚨</span> Alerts
+        </a>
+        <a href="{{ url_for('reports_page') }}" class="nav-item {{ 'active' if active=='reports' }}">
+          <span class="nav-ic">📑</span> Reports
+        </a>
+        <a href="{{ url_for('settings_page') }}" class="nav-item {{ 'active' if active=='settings' }}">
+          <span class="nav-ic">⚙️</span> Settings
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <span class="pulse-dot"></span> Windows 10/11 Agent
+      </div>
+    </aside>
+
+    <!-- ================= MAIN ================= -->
+    <div class="main-col">
+      <header class="topbar">
+        <div class="topbar-title">
+          <h1>{% block page_title %}Dashboard{% endblock %}</h1>
+          <p class="topbar-sub">{% block page_sub %}Unified network security overview{% endblock %}</p>
+        </div>
+        <div class="topbar-status">
+          {% if is_admin %}
+          <span class="status-chip online"
+            style="background:rgba(63,185,80,0.1); color:var(--good); border-color:rgba(63,185,80,0.3);"><span
+              class="pulse-dot" style="background-color:var(--good);"></span> Elevated Privileges (Admin)</span>
+          {% else %}
+          <span class="status-chip offline"
+            style="background:rgba(210,153,34,0.1); color:var(--warn); border-color:rgba(210,153,34,0.3);"><span
+              class="pulse-dot" style="background-color:var(--warn);"></span> Standard Privileges (No Logs)</span>
+          {% endif %}
+          <span class="status-chip online"><span class="pulse-dot"></span> System Online</span>
+          <span class="topbar-clock" id="liveClock" data-mono></span>
+        </div>
+      </header>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      <div class="flash-stack">
+        {% for category, message in messages %}
+        <div class="flash flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+      {% endif %}
+      {% endwith %}
+
+      <main class="content">
+        {% block content %}{% endblock %}
+      </main>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+  {% block extra_scripts %}{% endblock %}
+</body>
+
+</html>

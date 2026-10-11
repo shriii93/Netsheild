@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Firewall{% endblock %}
+{% block page_title %}Windows Firewall Monitor{% endblock %}
+{% block page_sub %}Live view of allowed, blocked, and suspicious connections{% endblock %}
+
+{% block content %}
+
+<div class="grid grid-3">
+  <div class="card stat-card stat-good">
+    <div class="stat-label">Allowed</div>
+    <div class="stat-value">{{ "{:,}".format(counts.allowed) }}</div>
+  </div>
+  <div class="card stat-card stat-bad">
+    <div class="stat-label">Blocked</div>
+    <div class="stat-value">{{ "{:,}".format(counts.blocked) }}</div>
+  </div>
+  <div class="card stat-card stat-warn">
+    <div class="stat-label">Suspicious</div>
+    <div class="stat-value">{{ "{:,}".format(counts.suspicious) }}</div>
+  </div>
+</div>
+
+<div class="card mt-16">
+  <div class="card-header">
+    <h2>Recent Events</h2>
+    <a class="badge badge-info" href="#">View Windows Events →</a>
+  </div>
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead><tr><th>Time</th><th>Source</th><th>Destination</th><th>Rule</th><th>Action</th></tr></thead>
+      <tbody>
+        {% for e in events %}
+        <tr>
+          <td class="mono text-muted">{{ e.event_time }}</td>
+          <td class="mono">{{ e.source_ip }}</td>
+          <td class="mono">{{ e.destination }}</td>
+          <td>{{ e.rule_name }}</td>
+          <td>
+            {% if e.action == 'ALLOWED' %}
+              <span class="badge badge-good">ALLOWED</span>
+            {% elif e.action == 'BLOCKED' %}
+              <span class="badge badge-bad">BLOCKED</span>
+            {% else %}
+              <span class="badge badge-warn">SUSPICIOUS</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}SIEM{% endblock %}
+{% block page_title %}NetShield SIEM{% endblock %}
+{% block page_sub %}Correlated event stream across all modules{% endblock %}
+
+{% block content %}
+
+<div class="grid grid-3">
+  <div class="card stat-card stat-info">
+    <div class="stat-label">Events Collected</div>
+    <div class="stat-value">{{ "{:,}".format(counts.events_collected) }}</div>
+  </div>
+  <div class="card stat-card stat-warn">
+    <div class="stat-label">Alerts Generated</div>
+    <div class="stat-value">{{ counts.alerts_generated }}</div>
+  </div>
+  <div class="card stat-card stat-good">
+    <div class="stat-label">Sources Feeding SIEM</div>
+    <div class="stat-value">{{ sources|length }}</div>
+  </div>
+</div>
+
+<div class="card mt-16">
+  <div class="card-header">
+    <h2>Event Stream</h2>
+    <form method="GET" style="display:flex; gap:8px;">
+      <select name="severity" onchange="this.form.submit()">
+        <option value="">All severities</option>
+        {% for s in ["LOW","MEDIUM","HIGH","CRITICAL"] %}
+        <option value="{{ s }}" {{ 'selected' if s==selected_severity }}>{{ s }}</option>
+        {% endfor %}
+      </select>
+      <select name="source" onchange="this.form.submit()">
+        <option value="">All sources</option>
+        {% for s in sources %}
+        <option value="{{ s }}" {{ 'selected' if s==selected_source }}>{{ s }}</option>
+        {% endfor %}
+      </select>
+    </form>
+  </div>
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead><tr><th>Severity</th><th>Source</th><th>Event</th><th>Time</th></tr></thead>
+      <tbody>
+        {% for e in events %}
+        <tr>
+          <td>
+            <span class="badge {{ 'badge-bad' if e.severity=='HIGH' else ('badge-warn' if e.severity=='MEDIUM' else ('badge-crit' if e.severity=='CRITICAL' else 'badge-good')) }}">{{ e.severity }}</span>
+          </td>
+          <td>{{ e.source }}</td>
+          <td>{{ e.event }}</td>
+          <td class="mono text-muted">{{ e.event_time }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="4" class="text-muted">No events match the selected filters.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="btn-row mt-16" style="margin-bottom:0;">
+    <a class="btn btn-ghost" href="{{ url_for('reports_page') }}">📑 Export Report</a>
+  </div>
+</div>
+
+{% endblock %}

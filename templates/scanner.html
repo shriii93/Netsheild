@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}LAN Discovery{% endblock %}
+{% block page_title %}LAN Device Discovery{% endblock %}
+{% block page_sub %}Authorized discovery scoped to your local subnet{% endblock %}
+
+{% block content %}
+
+<div class="btn-row">
+  <span class="badge badge-neutral mono">Network: {{ result.subnet }}</span>
+  <form method="POST" action="{{ url_for('discovery_scan') }}" style="display:inline">
+    <button class="btn" type="submit">🔎 Scan Network</button>
+  </form>
+  <a class="btn btn-ghost" href="{{ url_for('discovery_export') }}">⬇ Export CSV</a>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <h2>Discovered Devices</h2>
+    <span class="badge badge-info">{{ result.count }} found</span>
+  </div>
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr><th>IP Address</th><th>Hostname</th><th>MAC Address</th><th>Status</th><th>Last Seen</th></tr>
+      </thead>
+      <tbody>
+        {% for d in result.devices %}
+        <tr>
+          <td class="mono">{{ d.ip_address }}</td>
+          <td>{{ d.hostname }}</td>
+          <td class="mono">{{ d.mac_address }}</td>
+          <td>
+            {% if d.status == 'online' %}
+              <span class="badge badge-good"><span class="dot dot-good"></span> Online</span>
+            {% else %}
+              <span class="badge badge-bad"><span class="dot dot-bad"></span> Offline</span>
+            {% endif %}
+          </td>
+          <td class="mono text-muted">{{ d.last_seen }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}

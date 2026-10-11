@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Alerts{% endblock %}
+{% block page_title %}Alert Center{% endblock %}
+{% block page_sub %}Every module feeds into a single correlated alert engine{% endblock %}
+
+{% block content %}
+
+<div class="btn-row">
+  <a class="badge {{ 'badge-info' if not selected_status else 'badge-neutral' }}" href="{{ url_for('alerts_page') }}">All</a>
+  <a class="badge {{ 'badge-info' if selected_status=='open' else 'badge-neutral' }}" href="{{ url_for('alerts_page', status='open') }}">Open</a>
+  <a class="badge {{ 'badge-info' if selected_status=='reviewed' else 'badge-neutral' }}" href="{{ url_for('alerts_page', status='reviewed') }}">Reviewed</a>
+  <a class="badge {{ 'badge-info' if selected_status=='resolved' else 'badge-neutral' }}" href="{{ url_for('alerts_page', status='resolved') }}">Resolved</a>
+  <span class="text-muted" style="margin-left:auto; font-size:12.5px;">{{ summary.total }} open · {{ summary.HIGH }} high · {{ summary.MEDIUM }} medium · {{ summary.LOW }} low</span>
+</div>
+
+<div class="feed">
+  {% for a in alerts %}
+  <div class="card feed-item sev-{{ a.severity }}" style="align-items:center;">
+    <span class="dot {{ 'dot-bad' if a.severity=='HIGH' else ('dot-warn' if a.severity=='MEDIUM' else ('dot-crit' if a.severity=='CRITICAL' else 'dot-good')) }}"></span>
+    <div style="flex:1;">
+      <div class="feed-title">
+        <span class="badge {{ 'badge-bad' if a.severity=='HIGH' else ('badge-warn' if a.severity=='MEDIUM' else ('badge-crit' if a.severity=='CRITICAL' else 'badge-good')) }}">{{ a.severity }}</span>
+        &nbsp; {{ a.title }}
+      </div>
+      <div class="feed-meta">{{ a.source }} · {{ a.created_at }} · status: {{ a.status }}</div>
+      <div class="feed-desc">{{ a.description }}</div>
+    </div>
+    <div style="display:flex; gap:8px;">
+      {% if a.status != 'reviewed' %}
+      <form method="POST" action="{{ url_for('alert_update_status', alert_id=a.id) }}">
+        <input type="hidden" name="status" value="reviewed">
+        <button class="btn btn-ghost btn-sm" type="submit">Mark Reviewed</button>
+      </form>
+      {% endif %}
+      {% if a.status != 'resolved' %}
+      <form method="POST" action="{{ url_for('alert_update_status', alert_id=a.id) }}">
+        <input type="hidden" name="status" value="resolved">
+        <button class="btn btn-sm" type="submit">Resolve</button>
+      </form>
+      {% endif %}
+    </div>
+  </div>
+  {% else %}
+  <div class="empty-state"><div class="empty-ic">✅</div>No alerts match this filter.</div>
+  {% endfor %}
+</div>
+
+{% endblock %}

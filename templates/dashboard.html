@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Security Overview{% endblock %}
+{% block page_sub %}Unified view across all eight NetShield modules{% endblock %}
+
+{% block content %}
+
+<div class="grid grid-4">
+  <div class="card stat-card stat-good">
+    <div class="stat-label">Network</div>
+    <div class="stat-value">Online <small>{{ avg_latency }} ms avg</small></div>
+    <div class="stat-foot">{{ devices_online }}/{{ devices_total }} hosts responding</div>
+  </div>
+
+  <div class="card stat-card stat-info">
+    <div class="stat-label">Devices Discovered</div>
+    <div class="stat-value">{{ devices_total }} <small>on LAN</small></div>
+    <div class="stat-foot">{{ devices_online }} online now</div>
+  </div>
+
+  <div class="card stat-card {{ 'stat-good' if risk=='LOW' else ('stat-warn' if risk=='MEDIUM' else 'stat-bad') }}">
+    <div class="stat-label">Security Score</div>
+    <div class="stat-value">{{ security_score }}<small>/100</small></div>
+    <div class="stat-foot">Overall risk: <span class="badge {{ 'badge-good' if risk=='LOW' else ('badge-warn' if risk=='MEDIUM' else 'badge-bad') }}">{{ risk }}</span></div>
+  </div>
+
+  <div class="card stat-card {{ 'stat-bad' if alert_summary.HIGH else ('stat-warn' if alert_summary.MEDIUM else 'stat-good') }}">
+    <div class="stat-label">Open Alerts</div>
+    <div class="stat-value">{{ alert_summary.total }} <small>active</small></div>
+    <div class="stat-foot">{{ alert_summary.HIGH }} high · {{ alert_summary.MEDIUM }} medium · {{ alert_summary.LOW }} low</div>
+  </div>
+</div>
+
+<div class="grid grid-2 mt-16">
+  <div class="card">
+    <div class="card-header">
+      <h2>Network Performance</h2>
+      <span class="badge badge-neutral">Last 30 samples</span>
+    </div>
+    <div class="chart-box"><canvas id="latencyChart"></canvas></div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h2>Recent Security Alerts</h2>
+      <a href="{{ url_for('alerts_page') }}" class="badge badge-info">View all →</a>
+    </div>
+    <div class="feed">
+      {% for a in alerts %}
+      <div class="feed-item sev-{{ a.severity }}">
+        <span class="dot {{ 'dot-bad' if a.severity=='HIGH' else ('dot-warn' if a.severity=='MEDIUM' else ('dot-crit' if a.severity=='CRITICAL' else 'dot-good')) }}"></span>
+        <div>
+          <div class="feed-title">{{ a.title }}</div>
+          <div class="feed-meta">{{ a.source }} · {{ a.created_at }}</div>
+        </div>
+      </div>
+      {% else %}
+      <div class="empty-state"><div class="empty-ic">✅</div>No open alerts right now.</div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<div class="section-title">Module Summary</div>
+<div class="strip">
+  <div class="card">
+    <div class="strip-title">🧱 Firewall</div>
+    <div class="strip-row"><span>Allowed</span><span style="color:var(--good)">{{ fw_counts.allowed }}</span></div>
+    <div class="strip-row"><span>Blocked</span><span style="color:var(--danger)">{{ fw_counts.blocked }}</span></div>
+    <div class="strip-row"><span>Suspicious</span><span style="color:var(--warn)">{{ fw_counts.suspicious }}</span></div>
+  </div>
+  <div class="card">
+    <div class="strip-title">🌐 DNS</div>
+    <div class="strip-row"><span>Normal</span><span style="color:var(--good)">{{ dns_counts.normal }}</span></div>
+    <div class="strip-row"><span>Review</span><span style="color:var(--warn)">{{ dns_counts.review }}</span></div>
+    <div class="strip-row"><span>Blocked</span><span style="color:var(--danger)">{{ dns_counts.blocked }}</span></div>
+  </div>
+  <div class="card">
+    <div class="strip-title">📡 PCAP Analysis</div>
+    {% if pcap %}
+    <div class="strip-row"><span>Packets analyzed</span><span>{{ "{:,}".format(pcap.packets_total) }}</span></div>
+    <div class="strip-row"><span>TCP / UDP</span><span>{{ "{:,}".format(pcap.tcp_count) }} / {{ "{:,}".format(pcap.udp_count) }}</span></div>
+    <div class="strip-row"><span>Findings flagged</span><span style="color:var(--warn)">{{ pcap.findings|length }}</span></div>
+    {% else %}
+    <div class="text-muted">No capture analyzed yet.</div>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+fetch("/api/monitoring/history")
+  .then(r => r.json())
+  .then(series => {
+    const colors = ["#2DD4BF", "#5B8DEF", "#D29922", "#B855F0"];
+    const hosts = Object.keys(series);
+    const labels = hosts.length ? series[hosts[0]].labels : [];
+    const datasets = hosts.map((h, i) => ({
+      label: h, data: series[h].data, color: colors[i % colors.length]
+    }));
+    buildLineChart(document.getElementById("latencyChart"), labels, datasets);
+  });
+</script>
+{% endblock %}

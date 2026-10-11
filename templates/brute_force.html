@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Brute-Force Detection{% endblock %}
+{% block page_title %}Authentication Monitor{% endblock %}
+{% block page_sub %}Failed-login tracking and brute-force detection{% endblock %}
+
+{% block content %}
+
+<div class="grid grid-3">
+  <div class="card stat-card stat-bad">
+    <div class="stat-label">Failed Login Attempts Today</div>
+    <div class="stat-value">{{ total_failed }}</div>
+  </div>
+  <div class="card stat-card {{ 'stat-bad' if offender else 'stat-good' }}">
+    <div class="stat-label">Brute-Force Status</div>
+    <div class="stat-value" style="font-size:20px;">{{ 'ACTIVE ALERT' if offender else 'No Active Threats' }}</div>
+  </div>
+  <div class="card stat-card stat-info">
+    <div class="stat-label">Accounts Monitored</div>
+    <div class="stat-value">{{ summary|length }}</div>
+  </div>
+</div>
+
+<div class="card mt-16">
+  <div class="card-header"><h2>Account Activity</h2></div>
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead><tr><th>Account</th><th>Failed Attempts</th><th>Successful</th><th>Status</th></tr></thead>
+      <tbody>
+        {% for s in summary %}
+        <tr>
+          <td class="mono">{{ s.account }}</td>
+          <td class="mono">{{ s.failed }}</td>
+          <td class="mono">{{ s.succeeded }}</td>
+          <td>
+            {% if s.status == 'HIGH' %}
+              <span class="badge badge-bad">HIGH</span>
+            {% elif s.status == 'MEDIUM' %}
+              <span class="badge badge-warn">WARNING</span>
+            {% else %}
+              <span class="badge badge-good">NORMAL</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% if offender %}
+<div class="card mt-16" style="border-left: 3px solid var(--danger);">
+  <div class="card-header"><h2>🚨 Security Alert</h2></div>
+  <p style="margin-top:0;">Possible brute-force behaviour detected.</p>
+  <div class="strip-row"><span>Account</span><span class="mono">{{ offender.account }}</span></div>
+  <div class="strip-row"><span>Failed Attempts</span><span class="mono">{{ offender.failed }}</span></div>
+  <div class="strip-row"><span>Time Window</span><span class="mono">5 minutes</span></div>
+  <div class="btn-row mt-16" style="margin-bottom:0;">
+    <form method="POST" action="{{ url_for('brute_force_investigate', account=offender.account) }}">
+      <button class="btn" type="submit">Investigate</button>
+    </form>
+    <a class="btn btn-ghost" href="{{ url_for('alerts_page') }}">Mark as Reviewed</a>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}
